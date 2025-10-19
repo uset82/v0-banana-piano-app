@@ -10,9 +10,43 @@ interface SerialMessage {
 export function useSerialConnection() {
   const [isConnected, setIsConnected] = useState(false)
   const [lastMessage, setLastMessage] = useState<SerialMessage | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [isSerialAvailable, setIsSerialAvailable] = useState(true)
   const portRef = useRef<SerialPort | null>(null)
   const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array> | null>(null)
   const bufferRef = useRef<string>("")
+
+  useEffect(() => {
+    const checkSerialAvailability = async () => {
+      if (typeof navigator === "undefined" || !("serial" in navigator)) {
+        setIsSerialAvailable(false)
+        return
+      }
+
+      // Check if we're in an iframe with restricted permissions
+      if (window.self !== window.top) {
+        setIsSerialAvailable(false)
+        setError(
+          "Serial access is not available in preview mode. Deploy this app to Vercel or run it locally to connect your hardware.",
+        )
+        return
+      }
+
+      // Try to check permissions policy
+      try {
+        const permissionStatus = await navigator.permissions.query({ name: "serial" as any })
+        if (permissionStatus.state === "denied") {
+          setIsSerialAvailable(false)
+          setError("Serial access is denied. Please check your browser permissions.")
+        }
+      } catch (e) {
+        // Permissions API might not support serial, that's okay
+        // We'll find out when we try to connect
+      }
+    }
+
+    checkSerialAvailability()
+  }, [])
 
   const disconnect = useCallback(async () => {
     if (readerRef.current) {
@@ -20,7 +54,7 @@ export function useSerialConnection() {
         await readerRef.current.cancel()
         readerRef.current.releaseLock()
       } catch (e) {
-        console.error("[v0] Error canceling reader:", e)
+        // Silent cleanup
       }
       readerRef.current = null
     }
@@ -29,18 +63,29 @@ export function useSerialConnection() {
       try {
         await portRef.current.close()
       } catch (e) {
-        console.error("[v0] Error closing port:", e)
+        // Silent cleanup
       }
       portRef.current = null
     }
 
     setIsConnected(false)
     bufferRef.current = ""
+    setError(null)
   }, [])
 
   const connect = useCallback(async () => {
+    setError(null)
+
     if (typeof navigator === "undefined" || !("serial" in navigator)) {
-      alert("Web Serial API is not supported in your browser.")
+      const errorMsg = "Web Serial API is not supported in your browser. Please use Chrome, Edge, or Opera."
+      setError(errorMsg)
+      return
+    }
+
+    if (!isSerialAvailable) {
+      setError(
+        "Serial access is not available in this environment. Deploy this app to Vercel or run it locally to connect your hardware.",
+      )
       return
     }
 
@@ -79,24 +124,32 @@ export function useSerialConnection() {
                   const message = JSON.parse(line) as SerialMessage
                   setLastMessage(message)
                 } catch (e) {
-                  console.error("[v0] Failed to parse JSON:", line, e)
+                  // Silent parse error
                 }
               }
             }
           }
         } catch (error) {
-          console.error("[v0] Serial read error:", error)
+          // Silent read error
         } finally {
           await disconnect()
         }
       }
 
       readLoop()
-    } catch (error) {
-      console.error("[v0] Failed to connect:", error)
-      alert("Failed to connect to device. Please try again.")
+    } catch (error: any) {
+      if (error.message?.includes("permissions policy")) {
+        setError(
+          "Serial access is blocked in this preview environment. Deploy this app to Vercel or run it locally to connect your hardware.",
+        )
+        setIsSerialAvailable(false)
+      } else if (error.name === "NotFoundError") {
+        setError("No device selected. Please try again and select your STM32 device.")
+      } else {
+        setError("Failed to connect to device. Make sure your STM32 is connected and try again.")
+      }
     }
-  }, [disconnect])
+  }, [disconnect, isSerialAvailable])
 
   // Cleanup on unmount
   useEffect(() => {
@@ -110,5 +163,7 @@ export function useSerialConnection() {
     connect,
     disconnect,
     lastMessage,
+    error,
+    isSerialAvailable,
   }
 }

@@ -2,24 +2,25 @@
 
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Usb, MouseOff as UsbOff, AlertCircle } from "lucide-react"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { useEffect, useState } from "react"
+import { Usb, MouseOff as UsbOff, AlertCircle, Info } from "lucide-react"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 interface SerialConnectionProps {
   isConnected: boolean
   onConnect: () => Promise<void>
   onDisconnect: () => void
+  error?: string | null
+  isSerialAvailable?: boolean
 }
 
-export function SerialConnection({ isConnected, onConnect, onDisconnect }: SerialConnectionProps) {
-  // Avoid reading `navigator` during SSR to prevent hydration mismatches.
-  // Start with `false` so server and first client render match; update after mount.
-  const [isWebSerialSupported, setIsWebSerialSupported] = useState(false)
-
-  useEffect(() => {
-    setIsWebSerialSupported(typeof navigator !== "undefined" && "serial" in navigator)
-  }, [])
+export function SerialConnection({
+  isConnected,
+  onConnect,
+  onDisconnect,
+  error,
+  isSerialAvailable = true,
+}: SerialConnectionProps) {
+  const isWebSerialSupported = typeof navigator !== "undefined" && "serial" in navigator
 
   return (
     <Card className="p-6 bg-card/50 backdrop-blur-sm">
@@ -36,17 +37,35 @@ export function SerialConnection({ isConnected, onConnect, onDisconnect }: Seria
         <Button
           onClick={isConnected ? onDisconnect : onConnect}
           variant={isConnected ? "outline" : "default"}
-          disabled={!isWebSerialSupported}
+          disabled={!isWebSerialSupported || !isSerialAvailable}
         >
           {isConnected ? "Disconnect" : "Connect Device"}
         </Button>
       </div>
+
+      {error && (
+        <Alert className="mt-4" variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Connection Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
 
       {!isWebSerialSupported && (
         <Alert className="mt-4" variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
             Web Serial API is not supported in your browser. Please use Chrome, Edge, or Opera.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {isWebSerialSupported && !isConnected && !error && isSerialAvailable && (
+        <Alert className="mt-4">
+          <Info className="h-4 w-4" />
+          <AlertTitle>Ready to Connect</AlertTitle>
+          <AlertDescription>
+            Click "Connect Device" to select your STM32 microcontroller from the available USB serial ports.
           </AlertDescription>
         </Alert>
       )}
