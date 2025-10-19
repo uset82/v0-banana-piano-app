@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Usb, MouseOff as UsbOff, AlertCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { useEffect, useState } from "react"
 
 interface SerialConnectionProps {
   isConnected: boolean
@@ -12,7 +13,13 @@ interface SerialConnectionProps {
 }
 
 export function SerialConnection({ isConnected, onConnect, onDisconnect }: SerialConnectionProps) {
-  const isWebSerialSupported = typeof navigator !== "undefined" && "serial" in navigator
+  // Avoid reading `navigator` during SSR to prevent hydration mismatches.
+  // Start with `false` so server and first client render match; update after mount.
+  const [isWebSerialSupported, setIsWebSerialSupported] = useState(false)
+
+  useEffect(() => {
+    setIsWebSerialSupported(typeof navigator !== "undefined" && "serial" in navigator)
+  }, [])
 
   return (
     <Card className="p-6 bg-card/50 backdrop-blur-sm">

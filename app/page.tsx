@@ -68,12 +68,12 @@ export default function BananaPianoPage() {
         {/* Header */}
         <header className="mb-12 text-center">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <Music2 className="w-12 h-12 text-primary" />
-            <h1 className="text-6xl font-bold text-balance bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+            <Music2 className="w-8 h-8 sm:w-12 sm:h-12 text-primary" />
+            <h1 className="text-3xl sm:text-6xl font-bold text-balance bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
               Banana Piano
             </h1>
           </div>
-          <p className="text-xl text-muted-foreground text-balance max-w-2xl mx-auto">
+          <p className="text-base sm:text-xl text-muted-foreground text-balance max-w-2xl mx-auto">
             Turn bananas into a musical instrument. Connect your STM32 microcontroller and start playing!
           </p>
         </header>
@@ -86,10 +86,10 @@ export default function BananaPianoPage() {
         {/* Main Piano Interface */}
         <div className="grid lg:grid-cols-[1fr_300px] gap-8">
           {/* Piano Keys */}
-          <Card className="p-8 bg-card/50 backdrop-blur-sm border-2">
+          <Card className="p-4 sm:p-8 bg-card/50 backdrop-blur-sm border-2">
             <div className="flex flex-col gap-4">
-              <h2 className="text-2xl font-semibold mb-4 text-center">Your Banana Keyboard</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4">
+              <h2 className="text-lg sm:text-2xl font-semibold mb-4 text-center">Your Banana Keyboard</h2>
+              <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-7 gap-2 sm:gap-4 overflow-x-auto sm:overflow-visible -mx-2 px-2">
                 {NOTES.map((note, index) => (
                   <BananaKey
                     key={note}
@@ -102,7 +102,7 @@ export default function BananaPianoPage() {
                   />
                 ))}
               </div>
-              <p className="text-sm text-muted-foreground text-center mt-4">
+              <p className="text-xs sm:text-sm text-muted-foreground text-center mt-4">
                 {isConnected
                   ? "Touch your bananas to play notes!"
                   : "Click or tap the bananas to test sounds, or connect your device to play with real bananas!"}

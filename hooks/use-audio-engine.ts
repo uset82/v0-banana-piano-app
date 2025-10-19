@@ -81,7 +81,7 @@ export function useAudioEngine() {
   }, [effects])
 
   const playNote = useCallback(
-    (note: string) => {
+    async (note: string) => {
       if (!audioContextRef.current || !masterGainRef.current) {
         console.log("[v0] Audio context not ready")
         return
@@ -90,7 +90,12 @@ export function useAudioEngine() {
       // Resume audio context if suspended (browser autoplay policy)
       if (audioContextRef.current.state === "suspended") {
         console.log("[v0] Resuming suspended audio context")
-        audioContextRef.current.resume()
+        try {
+          await audioContextRef.current.resume()
+        } catch (err) {
+          console.log("[v0] Failed to resume audio context:", err)
+          return
+        }
       }
 
       // Stop existing oscillator for this note
