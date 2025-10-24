@@ -1,6 +1,5 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Usb, MouseOff as UsbOff, AlertCircle, Info } from "lucide-react"
@@ -21,19 +20,13 @@ export function SerialConnection({
   error,
   isSerialAvailable = true,
 }: SerialConnectionProps) {
-  // Ensure SSR and first client render match: detect Web Serial support after mount
-  const [isWebSerialSupported, setIsWebSerialSupported] = useState(false)
-  useEffect(() => {
-    setIsWebSerialSupported(typeof navigator !== "undefined" && "serial" in navigator)
-  }, [])
+  const isWebSerialSupported = typeof navigator !== "undefined" && "serial" in navigator
 
   return (
     <Card className="p-6 bg-card/50 backdrop-blur-sm">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          {isConnected
-            ? (Usb && <Usb className="w-6 h-6 text-accent" />)
-            : (UsbOff && <UsbOff className="w-6 h-6 text-muted-foreground" />)}
+          {isConnected ? <Usb className="w-6 h-6 text-accent" /> : <UsbOff className="w-6 h-6 text-muted-foreground" />}
           <div>
             <h3 className="font-semibold">{isConnected ? "Connected to STM32" : "Not Connected"}</h3>
             <p className="text-sm text-muted-foreground">
@@ -52,7 +45,7 @@ export function SerialConnection({
 
       {error && (
         <Alert className="mt-4" variant="destructive">
-          {AlertCircle && <AlertCircle className="h-4 w-4" />}
+          <AlertCircle className="h-4 w-4" />
           <AlertTitle>Connection Error</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
@@ -60,7 +53,7 @@ export function SerialConnection({
 
       {!isWebSerialSupported && (
         <Alert className="mt-4" variant="destructive">
-          {AlertCircle && <AlertCircle className="h-4 w-4" />}
+          <AlertCircle className="h-4 w-4" />
           <AlertDescription>
             Web Serial API is not supported in your browser. Please use Chrome, Edge, or Opera.
           </AlertDescription>

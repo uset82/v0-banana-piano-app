@@ -22,8 +22,7 @@ export function InstrumentSelector({ currentInstrument, onInstrumentChange }: In
           className={cn("justify-start gap-3 h-auto py-4", currentInstrument === "piano" && "ring-2 ring-primary")}
           onClick={() => onInstrumentChange("piano")}
         >
--          <Piano className="w-5 h-5" />
-+          {Piano && <Piano className="w-5 h-5" />}
+          <Piano className="w-5 h-5" />
           <div className="text-left">
             <div className="font-semibold">Piano</div>
             <div className="text-xs opacity-80">Classic piano sound</div>
@@ -34,8 +33,7 @@ export function InstrumentSelector({ currentInstrument, onInstrumentChange }: In
           className={cn("justify-start gap-3 h-auto py-4", currentInstrument === "guitar" && "ring-2 ring-primary")}
           onClick={() => onInstrumentChange("guitar")}
         >
--          <Guitar className="w-5 h-5" />
-+          {Guitar && <Guitar className="w-5 h-5" />}
+          <Guitar className="w-5 h-5" />
           <div className="text-left">
             <div className="font-semibold">Guitar</div>
             <div className="text-xs opacity-80">Acoustic guitar tone</div>

@@ -7,8 +7,7 @@ function Card({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="card"
       className={cn(
-        // Glassy iOS-style default surface
-        'bg-white/20 backdrop-blur-xl border border-white/25 shadow-xl text-card-foreground flex flex-col gap-6 rounded-xl py-6',
+        'bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm',
         className,
       )}
       {...props}
